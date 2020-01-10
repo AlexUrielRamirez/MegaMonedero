@@ -8,6 +8,7 @@
     tools:context=".Feed.Feed">
 
     <LinearLayout
+        android:id="@+id/Opcion_transporte"
         android:layout_gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,9 +26,10 @@
             android:layout_height="wrap_content"
             android:textColor="#000000"
             android:padding="5dp"
-            android:text="Transporte"/>
+            android:text="Transporte\n"/>
     </LinearLayout>
     <LinearLayout
+        android:id="@+id/Opcion_servicios"
         android:layout_gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,7 +47,8 @@
             android:layout_height="wrap_content"
             android:textColor="#000000"
             android:padding="5dp"
-            android:text="Servicios"/>
+            android:text="Servicios\nCENSER"
+            android:textAlignment="center"/>
     </LinearLayout>
 
 </LinearLayout>
