@@ -1,21 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
 
-    <SearchView
-        android:id="@+id/Buscador"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:iconifiedByDefault="false">
-
-        <requestFocus />
-    </SearchView>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/RecyclerSugerencias"
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/Buscador"/>
+        tools:context=".FirstMapActivity" />
+    <RelativeLayout
+        android:id="@+id/HolderSearchBar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
 
+        <EditText
+            android:id="@+id/Buscador"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_margin="7.5dp"
+            android:padding="5dp"
+            android:background="@drawable/buscador_background"
+            android:imeOptions="actionSearch"
+            android:drawableLeft="@drawable/buscador_gris_claro"
+            android:drawablePadding="5dp"
+            android:hint="Buscar servicios"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/RecyclerSugerencias"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/Buscador"
+            android:padding="10dp"/>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/buscador_gris_claro"
+            android:id="@+id/buscador_comprimido_ico"
+            android:layout_margin="10dp"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
 </RelativeLayout>
