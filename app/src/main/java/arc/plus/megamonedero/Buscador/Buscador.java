@@ -3,10 +3,13 @@ package arc.plus.megamonedero.Buscador;
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,16 +29,29 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.List;
 
 import arc.plus.megamonedero.Methods;
+import arc.plus.megamonedero.Principal;
 import arc.plus.megamonedero.R;
 
-public class Buscador extends Fragment implements TextWatcher {
+import static android.content.Context.LOCATION_SERVICE;
+
+public class Buscador extends Fragment implements OnMapReadyCallback, TextWatcher {
 
     public Buscador(Integer TIPO_BUSQUEDA) {
         this.TIPO_BUSQUEDA = TIPO_BUSQUEDA;
@@ -48,6 +64,54 @@ public class Buscador extends Fragment implements TextWatcher {
     private ArrayList<Entidades> arrayList = new ArrayList<>(), FilterList = new ArrayList<>();
     private ImageView IconoBuscadorComprimido;
     private LayoutTransition lt;
+    private GoogleMap Mapa;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_buscador, container, false);
+
+        checkLocationPermission();
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        new FillList().execute();
+        lt = new LayoutTransition();
+        lt.enableTransitionType(LayoutTransition.CHANGING);
+
+        HolderSearchBar = view.findViewById(R.id.HolderSearchBar);
+        HolderSearchBar.setLayoutTransition(lt);
+
+        IconoBuscadorComprimido = view.findViewById(R.id.buscador_comprimido_ico);
+        IconoBuscadorComprimido.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Methods.ExpandirBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
+            }
+        });
+
+        Buscador = view.findViewById(R.id.Buscador);
+        Buscador.addTextChangedListener(this);
+        Buscador.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    Methods.ContraerBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
+                    Methods.hideKeyboard(getActivity());
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        Sugerencias = view.findViewById(R.id.RecyclerSugerencias);
+        Sugerencias.setLayoutManager(new LinearLayoutManager(getContext(),RecyclerView.VERTICAL,false));
+        Sugerencias.setHasFixedSize(true);
+
+        Sugerencias.setAdapter(new AdapterSugerencias(arrayList));
+
+        return view;
+    }
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -62,8 +126,8 @@ public class Buscador extends Fragment implements TextWatcher {
     @Override
     public void afterTextChanged(Editable s) {
         FilterList.clear();
-        for(int i = 0; i<arrayList.size();i++){
-            if(arrayList.get(i).getTitulo().toLowerCase().contains(removeDiacriticalMarks(s.toString().toLowerCase()))){
+        for (int i = 0; i < arrayList.size(); i++) {
+            if (arrayList.get(i).getTitulo().toLowerCase().contains(removeDiacriticalMarks(s.toString().toLowerCase()))) {
                 Entidades entidades = new Entidades();
                 entidades.setTitulo(arrayList.get(i).getTitulo());
                 entidades.setSubtitulo(arrayList.get(i).getSubtitulo());
@@ -74,7 +138,38 @@ public class Buscador extends Fragment implements TextWatcher {
         Sugerencias.getAdapter().notifyDataSetChanged();
     }
 
-    private class FillList extends AsyncTask<Void,Void,Void>{
+    public LocationManager mLocationManager;
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        @SuppressLint("MissingPermission")
+        Location location = getLastKnownLocation();
+        if(location != null){
+            LatLng UserLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            googleMap.addMarker(new MarkerOptions().position(UserLocation).title("Ubicación Actual"));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(UserLocation));
+        }else
+            Toast.makeText(getContext(), "ERROR_LOCATION_MANAGER_NULL", Toast.LENGTH_SHORT).show();
+    }
+
+    private Location getLastKnownLocation() {
+        mLocationManager = (LocationManager)getContext().getApplicationContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            @SuppressLint("MissingPermission") Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
+    }
+
+    private class FillList extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
 
@@ -130,50 +225,6 @@ public class Buscador extends Fragment implements TextWatcher {
 
             return null;
         }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_buscador, container, false);
-
-        checkLocationPermission();
-
-        new FillList().execute();
-        lt = new LayoutTransition();
-        lt.enableTransitionType(LayoutTransition.CHANGING);
-
-        HolderSearchBar = view.findViewById(R.id.HolderSearchBar);
-        HolderSearchBar.setLayoutTransition(lt);
-
-        IconoBuscadorComprimido = view.findViewById(R.id.buscador_comprimido_ico);
-        IconoBuscadorComprimido.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Methods.ExpandirBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
-            }
-        });
-
-        Buscador = view.findViewById(R.id.Buscador);
-        Buscador.addTextChangedListener(this);
-        Buscador.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    Methods.ContraerBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
-                    Methods.hideKeyboard(getActivity());
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        Sugerencias = view.findViewById(R.id.RecyclerSugerencias);
-        Sugerencias.setLayoutManager(new LinearLayoutManager(getContext(),RecyclerView.VERTICAL,false));
-        Sugerencias.setHasFixedSize(true);
-
-        Sugerencias.setAdapter(new AdapterSugerencias(arrayList));
-
-        return view;
     }
 
     private class Entidades{
