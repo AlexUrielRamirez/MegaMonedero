@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +42,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,11 +70,22 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
     private ImageView IconoBuscadorComprimido;
     private LayoutTransition lt;
     private GoogleMap Mapa;
+    public LocationManager mLocationManager;
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public JSONArray JsonArray_LocalCenser = new JSONArray();
+    public JSONObject
+            LocalJson1 = new JSONObject(),
+            LocalJson2 = new JSONObject(),
+            LocalJson3 = new JSONObject(),
+            LocalJson4 = new JSONObject(),
+            LocalJson5 = new JSONObject(),
+            LocalJson6 = new JSONObject();
+
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_buscador, container, false);
 
+        new FillLocalCenser().execute();
         checkLocationPermission();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -96,6 +112,7 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    BuscarCenser(0,"");
                     Methods.ContraerBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
                     Methods.hideKeyboard(getActivity());
                     return true;
@@ -113,21 +130,14 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
         return view;
     }
 
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-    }
+    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
+    @Override public void afterTextChanged(Editable s) {
         FilterList.clear();
         for (int i = 0; i < arrayList.size(); i++) {
-            if (arrayList.get(i).getTitulo().toLowerCase().contains(removeDiacriticalMarks(s.toString().toLowerCase()))) {
+            if (QuitarAcentos(arrayList.get(i).getTitulo().toLowerCase()).contains(QuitarAcentos(s.toString().toLowerCase()))) {
                 Entidades entidades = new Entidades();
                 entidades.setTitulo(arrayList.get(i).getTitulo());
                 entidades.setSubtitulo(arrayList.get(i).getSubtitulo());
@@ -138,21 +148,38 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
         Sugerencias.getAdapter().notifyDataSetChanged();
     }
 
-    public LocationManager mLocationManager;
+    @Override public void onMapReady(GoogleMap googleMap) {
+        Mapa = googleMap;
+        MarcarPosicionActual(googleMap);
+    }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void MarcarPosicionActual(GoogleMap googleMap){
         @SuppressLint("MissingPermission")
-        Location location = getLastKnownLocation();
+        Location location = ObtenerUltimaPosicionConocida();
         if(location != null){
             LatLng UserLocation = new LatLng(location.getLatitude(), location.getLongitude());
             googleMap.addMarker(new MarkerOptions().position(UserLocation).title("Ubicación Actual"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(UserLocation));
+            float zoom = 16.0f; //Hasta 21
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(UserLocation, zoom));
         }else
             Toast.makeText(getContext(), "ERROR_LOCATION_MANAGER_NULL", Toast.LENGTH_SHORT).show();
     }
 
-    private Location getLastKnownLocation() {
+
+
+    private void BuscarCenser(Integer Entrada, String Parametro){
+        try {
+            for(int i = 0; i < JsonArray_LocalCenser.length();i++){
+                JSONObject json = JsonArray_LocalCenser.getJSONObject(i);
+                LatLng UserLocation = new LatLng(Double.parseDouble(json.getString("Lat")), Double.parseDouble(json.getString("Lang")));
+                Mapa.addMarker(new MarkerOptions().position(UserLocation).title(json.getString("Nombre")));
+            }
+        }catch (JSONException e){
+            Log.e("JSONEX","Error pintando locations->"+e);
+        }
+    }
+
+    private Location ObtenerUltimaPosicionConocida() {
         mLocationManager = (LocationManager)getContext().getApplicationContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
@@ -162,68 +189,34 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
                 continue;
             }
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
                 bestLocation = l;
             }
         }
         return bestLocation;
     }
 
-    private class FillList extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
+    public static String QuitarAcentos(String string) {
+        return Normalizer.normalize(string, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
 
-            Entidades entidades1 = new Entidades();
-            entidades1.setTitulo("Mecánico");
-            entidades1.setSubtitulo("Mecánico");
-            arrayList.add(entidades1);
-
-            Entidades entidades2 = new Entidades();
-            entidades2.setTitulo("Doctor");
-            entidades2.setSubtitulo("Doctor");
-            arrayList.add(entidades2);
-
-            Entidades entidades3 = new Entidades();
-            entidades3.setTitulo("Abarrotes");
-            entidades3.setSubtitulo("Abarrotes");
-            arrayList.add(entidades3);
-
-            Entidades entidades4 = new Entidades();
-            entidades4.setTitulo("Restaurant");
-            entidades4.setSubtitulo("Restaurant");
-            arrayList.add(entidades4);
-
-            Entidades entidades5 = new Entidades();
-            entidades5.setTitulo("Estética");
-            entidades5.setSubtitulo("Estética");
-            arrayList.add(entidades5);
-
-            Entidades entidades6 = new Entidades();
-            entidades6.setTitulo("Jardinería");
-            entidades6.setSubtitulo("Jardinería");
-            arrayList.add(entidades6);
-
-            Entidades entidades7 = new Entidades();
-            entidades7.setTitulo("Paquetería");
-            entidades7.setSubtitulo("Paquetería");
-            arrayList.add(entidades7);
-
-            Entidades entidades8 = new Entidades();
-            entidades8.setTitulo("AutoServicio");
-            entidades8.setSubtitulo("AutoServicio");
-            arrayList.add(entidades8);
-
-            Entidades entidades9 = new Entidades();
-            entidades9.setTitulo("Gasolineras");
-            entidades9.setSubtitulo("Gasolineras");
-            arrayList.add(entidades9);
-
-            Entidades entidades10 = new Entidades();
-            entidades10.setTitulo("Bares");
-            entidades10.setSubtitulo("Bares");
-            arrayList.add(entidades10);
-
-            return null;
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            } else {
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            return true;
         }
     }
 
@@ -296,32 +289,91 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
         }
     }
 
-    public static String removeDiacriticalMarks(String string) {
-        return Normalizer.normalize(string, Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-    }
+    private class FillList extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
 
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+            Entidades entidades1 = new Entidades();
+            entidades1.setTitulo("Mecánico");
+            entidades1.setSubtitulo("Mecánico");
+            arrayList.add(entidades1);
 
-    public boolean checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(getContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            } else {
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-            return false;
-        } else {
-            return true;
+            Entidades entidades2 = new Entidades();
+            entidades2.setTitulo("Doctor");
+            entidades2.setSubtitulo("Doctor");
+            arrayList.add(entidades2);
+
+            Entidades entidades3 = new Entidades();
+            entidades3.setTitulo("Abarrotes");
+            entidades3.setSubtitulo("Abarrotes");
+            arrayList.add(entidades3);
+
+            Entidades entidades4 = new Entidades();
+            entidades4.setTitulo("Restaurant");
+            entidades4.setSubtitulo("Restaurant");
+            arrayList.add(entidades4);
+
+            Entidades entidades5 = new Entidades();
+            entidades5.setTitulo("Estética");
+            entidades5.setSubtitulo("Estética");
+            arrayList.add(entidades5);
+
+            Entidades entidades6 = new Entidades();
+            entidades6.setTitulo("Jardinería");
+            entidades6.setSubtitulo("Jardinería");
+            arrayList.add(entidades6);
+
+            Entidades entidades7 = new Entidades();
+            entidades7.setTitulo("Paquetería");
+            entidades7.setSubtitulo("Paquetería");
+            arrayList.add(entidades7);
+
+            Entidades entidades8 = new Entidades();
+            entidades8.setTitulo("AutoServicio");
+            entidades8.setSubtitulo("AutoServicio");
+            arrayList.add(entidades8);
+
+            Entidades entidades9 = new Entidades();
+            entidades9.setTitulo("Gasolineras");
+            entidades9.setSubtitulo("Gasolineras");
+            arrayList.add(entidades9);
+
+            Entidades entidades10 = new Entidades();
+            entidades10.setTitulo("Bares");
+            entidades10.setSubtitulo("Bares");
+            arrayList.add(entidades10);
+
+            return null;
         }
     }
 
+    private class FillLocalCenser extends AsyncTask<Void,Void,Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            try {
+                LocalJson1.put("Lat","19.687669");
+                LocalJson1.put("Lang","-99.161189");
+                LocalJson1.put("Nombre", "Censer 1");
+
+                LocalJson2.put("Lat","19.688972");
+                LocalJson2.put("Lang","99.165631");
+                LocalJson2.put("Nombre", "Censer 2");
+
+                LocalJson3.put("Lat","19.684912");
+                LocalJson3.put("Lang","99.158354");
+                LocalJson3.put("Nombre", "Censer 3");
+
+                JsonArray_LocalCenser.put(LocalJson1);
+                JsonArray_LocalCenser.put(LocalJson2);
+                JsonArray_LocalCenser.put(LocalJson3);
+
+            } catch (JSONException e) {
+                Log.e("JSONEX","Error llenando locations->"+e);
+            }
+
+            return null;
+        }
+    }
 
 }

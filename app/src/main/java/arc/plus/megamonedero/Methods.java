@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class Methods {
     public static void ContraerBuscador(Context context, RelativeLayout HolderSearchBar, EditText Buscador, ImageView IconoBuscadorComprimido, RecyclerView Sugerencias){
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(Constant.dpToPx(40), RelativeLayout.LayoutParams.WRAP_CONTENT);
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(Constant.dpToPx(40), Constant.dpToPx(40));
             params.addRule(RelativeLayout.ALIGN_PARENT_END);
             params.topMargin = Constant.dpToPx(10);
 
