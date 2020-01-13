@@ -19,9 +19,13 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,7 +43,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
@@ -50,6 +57,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
+import arc.plus.megamonedero.Constant;
 import arc.plus.megamonedero.Methods;
 import arc.plus.megamonedero.Principal;
 import arc.plus.megamonedero.R;
@@ -70,6 +78,7 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
     private ImageView IconoBuscadorComprimido;
     private LayoutTransition lt;
     private GoogleMap Mapa;
+    public static RelativeLayout Card;
     public LocationManager mLocationManager;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
@@ -127,6 +136,12 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
 
         Sugerencias.setAdapter(new AdapterSugerencias(arrayList));
 
+        Card = view.findViewById(R.id.card);
+
+        /*LayoutTransition layoutTransition = new LayoutTransition();
+        layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
+        Card.setLayoutTransition(layoutTransition);*/
+
         return view;
     }
 
@@ -158,7 +173,13 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
         Location location = ObtenerUltimaPosicionConocida();
         if(location != null){
             LatLng UserLocation = new LatLng(location.getLatitude(), location.getLongitude());
-            googleMap.addMarker(new MarkerOptions().position(UserLocation).title("Ubicación Actual"));
+
+            Marker marker = Mapa.addMarker(new MarkerOptions()
+                    .position(UserLocation)
+                    .title("Posicion Actual")
+                    .icon(BitmapDescriptorFactory.fromBitmap(Methods.drawableToBitmap(getContext().getResources().getDrawable(R.drawable.current_user_location)))));
+            marker.setTag(-1);
+
             float zoom = 16.0f; //Hasta 21
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(UserLocation, zoom));
         }else
@@ -172,7 +193,22 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
             for(int i = 0; i < JsonArray_LocalCenser.length();i++){
                 JSONObject json = JsonArray_LocalCenser.getJSONObject(i);
                 LatLng UserLocation = new LatLng(Double.parseDouble(json.getString("Lat")), Double.parseDouble(json.getString("Lang")));
-                Mapa.addMarker(new MarkerOptions().position(UserLocation).title(json.getString("Nombre")));
+
+                Marker marker = Mapa.addMarker(new MarkerOptions().position(UserLocation).title(json.getString("Nombre")));
+                marker.setTag(i);
+
+                Mapa.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        //int position = (int)(marker.getTag());
+                        // Toast.makeText(getContext(), "Tag: "+marker.getTag(), Toast.LENGTH_SHORT).show();
+                        if(Card.getVisibility() != View.VISIBLE)
+                            Methods.MostrarTarjeta(getContext(),Card);
+                        else
+                            Methods.EsconderTarjeta(getContext(),Card);
+                        return false;
+                    }
+                });
             }
         }catch (JSONException e){
             Log.e("JSONEX","Error pintando locations->"+e);
