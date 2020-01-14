@@ -52,5 +52,58 @@
         android:background="@drawable/buscador_background"
         android:layout_margin="10dp"
         android:layout_alignParentBottom="true"
-        android:visibility="gone"/>
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/card_img"
+            android:layout_margin="7.5dp"
+            android:layout_width="75dp"
+            android:layout_height="75dp"/>
+        <TextView
+            android:id="@+id/card_nombre"
+            android:text="Dummy Censer 1 (Estética)"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/card_img"
+            android:layout_marginTop="7.5dp"
+            android:layout_marginStart="5dp"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/card_descripcion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textColor="@color/black"
+            android:text="Dummy descripción Censer Estética con fines de prueba desarrollado por ARC+, lorem ipsum da torem, texto de prueba"
+            android:layout_toEndOf="@+id/card_img"
+            android:layout_below="@+id/card_nombre"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="7.5dp"
+                android:textColor="@color/black"
+                android:text="Cómo llegar"
+                android:background="@drawable/buscador_background"
+                android:drawableLeft="@drawable/flecha_map_azul"
+                android:drawablePadding="5dp"
+                android:layout_margin="7.5dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="7.5dp"
+                android:textColor="@color/black"
+                android:text="Fotos"
+                android:background="@drawable/buscador_background"
+                android:drawableLeft="@drawable/galeria_azul"
+                android:drawablePadding="5dp"
+                android:layout_margin="7.5dp"/>
+        </LinearLayout>
+    </RelativeLayout>
 </RelativeLayout>

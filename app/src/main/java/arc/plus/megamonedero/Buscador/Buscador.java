@@ -39,6 +39,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -81,6 +82,7 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
     public static RelativeLayout Card;
     public LocationManager mLocationManager;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    private ImageView Card_Image;
 
     public JSONArray JsonArray_LocalCenser = new JSONArray();
     public JSONObject
@@ -99,6 +101,9 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Card_Image = view.findViewById(R.id.card_img);
+        Glide.with(getContext()).load("https://www.beautymarket.es/estetica/foros/anuncio1547300315-12.jpg").centerCrop().override(240).into(Card_Image);
 
         new FillList().execute();
         lt = new LayoutTransition();
