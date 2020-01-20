@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -39,6 +40,10 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -49,23 +54,32 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import arc.plus.megamonedero.Constant;
+import arc.plus.megamonedero.Entidades.EntidadesCensers;
 import arc.plus.megamonedero.Methods;
 import arc.plus.megamonedero.Principal;
 import arc.plus.megamonedero.R;
 
 import static android.content.Context.LOCATION_SERVICE;
+import static arc.plus.megamonedero.Methods.QuitarAcentos;
 
-public class Buscador extends Fragment implements OnMapReadyCallback, TextWatcher {
+public class Buscador extends Fragment implements OnMapReadyCallback {
 
     public Buscador(Integer TIPO_BUSQUEDA) {
         this.TIPO_BUSQUEDA = TIPO_BUSQUEDA;
@@ -84,19 +98,12 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private ImageView Card_Image;
 
-    public JSONArray JsonArray_LocalCenser = new JSONArray();
-    public JSONObject
-            LocalJson1 = new JSONObject(),
-            LocalJson2 = new JSONObject(),
-            LocalJson3 = new JSONObject(),
-            LocalJson4 = new JSONObject(),
-            LocalJson5 = new JSONObject(),
-            LocalJson6 = new JSONObject();
+    private RequestQueue request;
+    private JsonObjectRequest jsonObjectRequest;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_buscador, container, false);
 
-        new FillLocalCenser().execute();
         checkLocationPermission();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
@@ -121,12 +128,30 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
         });
 
         Buscador = view.findViewById(R.id.Buscador);
-        Buscador.addTextChangedListener(this);
+        Buscador.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override public void afterTextChanged(Editable s) {
+                FilterList.clear();
+                for (int i = 0; i < arrayList.size(); i++) {
+                    if (QuitarAcentos(arrayList.get(i).getTitulo().toLowerCase()).contains(QuitarAcentos(s.toString().toLowerCase()))) {
+                        Entidades entidades = new Entidades();
+                        entidades.setTitulo(arrayList.get(i).getTitulo());
+                        entidades.setSubtitulo(arrayList.get(i).getSubtitulo());
+                        FilterList.add(entidades);
+                    }
+                }
+                Sugerencias.setAdapter(new AdapterSugerencias(FilterList));
+                Sugerencias.getAdapter().notifyDataSetChanged();
+            }
+        });
         Buscador.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    BuscarCenser(0,"");
+                    BuscarCenser(v.getText().toString());
                     Methods.ContraerBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
                     Methods.hideKeyboard(getActivity());
                     return true;
@@ -143,29 +168,7 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
 
         Card = view.findViewById(R.id.card);
 
-        /*LayoutTransition layoutTransition = new LayoutTransition();
-        layoutTransition.enableTransitionType(LayoutTransition.CHANGING);
-        Card.setLayoutTransition(layoutTransition);*/
-
         return view;
-    }
-
-    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-    @Override public void afterTextChanged(Editable s) {
-        FilterList.clear();
-        for (int i = 0; i < arrayList.size(); i++) {
-            if (QuitarAcentos(arrayList.get(i).getTitulo().toLowerCase()).contains(QuitarAcentos(s.toString().toLowerCase()))) {
-                Entidades entidades = new Entidades();
-                entidades.setTitulo(arrayList.get(i).getTitulo());
-                entidades.setSubtitulo(arrayList.get(i).getSubtitulo());
-                FilterList.add(entidades);
-            }
-        }
-        Sugerencias.setAdapter(new AdapterSugerencias(FilterList));
-        Sugerencias.getAdapter().notifyDataSetChanged();
     }
 
     @Override public void onMapReady(GoogleMap googleMap) {
@@ -191,35 +194,6 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
             Toast.makeText(getContext(), "ERROR_LOCATION_MANAGER_NULL", Toast.LENGTH_SHORT).show();
     }
 
-
-
-    private void BuscarCenser(Integer Entrada, String Parametro){
-        try {
-            for(int i = 0; i < JsonArray_LocalCenser.length();i++){
-                JSONObject json = JsonArray_LocalCenser.getJSONObject(i);
-                LatLng UserLocation = new LatLng(Double.parseDouble(json.getString("Lat")), Double.parseDouble(json.getString("Lang")));
-
-                Marker marker = Mapa.addMarker(new MarkerOptions().position(UserLocation).title(json.getString("Nombre")));
-                marker.setTag(i);
-
-                Mapa.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        //int position = (int)(marker.getTag());
-                        // Toast.makeText(getContext(), "Tag: "+marker.getTag(), Toast.LENGTH_SHORT).show();
-                        if(Card.getVisibility() != View.VISIBLE)
-                            Methods.MostrarTarjeta(getContext(),Card);
-                        else
-                            Methods.EsconderTarjeta(getContext(),Card);
-                        return false;
-                    }
-                });
-            }
-        }catch (JSONException e){
-            Log.e("JSONEX","Error pintando locations->"+e);
-        }
-    }
-
     private Location ObtenerUltimaPosicionConocida() {
         mLocationManager = (LocationManager)getContext().getApplicationContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
@@ -234,11 +208,6 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
             }
         }
         return bestLocation;
-    }
-
-    public static String QuitarAcentos(String string) {
-        return Normalizer.normalize(string, Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 
     public boolean checkLocationPermission() {
@@ -388,33 +357,30 @@ public class Buscador extends Fragment implements OnMapReadyCallback, TextWatche
         }
     }
 
-    private class FillLocalCenser extends AsyncTask<Void,Void,Void>{
-        @Override
-        protected Void doInBackground(Void... voids) {
+    private void BuscarCenser(String key){
+        request = Volley.newRequestQueue(getContext());
+        jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "http://192.168.100.215/test/traer_censer.php?key="+key, null, response -> {
+            JSONArray json = response.optJSONArray("CENSERS");
 
+            ArrayList<EntidadesCensers> list = new ArrayList<>();
             try {
-                LocalJson1.put("Lat","19.687669");
-                LocalJson1.put("Lang","-99.161189");
-                LocalJson1.put("Nombre", "Censer 1");
+                for (int i = 0; i < json.length(); i++) {
+                    EntidadesCensers entidades = new EntidadesCensers();
+                    JSONObject jsonObject = json.getJSONObject(i);
+                    entidades.setIdCenser(jsonObject.optString("Id"));
+                    entidades.setNombre(jsonObject.optString("Nombre"));
+                    entidades.setLat(jsonObject.optString("Lat"));
+                    entidades.setLang(jsonObject.optString("Lang"));
+                    list.add(entidades);
 
-                LocalJson2.put("Lat","19.688972");
-                LocalJson2.put("Lang","99.165631");
-                LocalJson2.put("Nombre", "Censer 2");
-
-                LocalJson3.put("Lat","19.684912");
-                LocalJson3.put("Lang","99.158354");
-                LocalJson3.put("Nombre", "Censer 3");
-
-                JsonArray_LocalCenser.put(LocalJson1);
-                JsonArray_LocalCenser.put(LocalJson2);
-                JsonArray_LocalCenser.put(LocalJson3);
-
+                    LatLng sydney = new LatLng(Double.parseDouble(entidades.getLat()),Double.parseDouble( entidades.getLang()));
+                    Mapa.addMarker(new MarkerOptions().position(sydney).title(entidades.getNombre()));
+                }
             } catch (JSONException e) {
-                Log.e("JSONEX","Error llenando locations->"+e);
+                Log.e("BuscarCenser","Error->"+e);
             }
-
-            return null;
-        }
+        }, error -> Log.e("BuscarCenser","request Error->"+error));
+        request.add(jsonObjectRequest);
     }
 
 }

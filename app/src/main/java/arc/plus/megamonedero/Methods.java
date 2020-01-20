@@ -9,13 +9,14 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.Transformation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.text.Normalizer;
 
 public class Methods {
     public static void ContraerBuscador(Context context, RelativeLayout HolderSearchBar, EditText Buscador, ImageView IconoBuscadorComprimido, RecyclerView Sugerencias){
@@ -44,13 +45,6 @@ public class Methods {
         Sugerencias.setVisibility(View.VISIBLE);
     }
 
-    public static void MostrarTarjeta(Context context, RelativeLayout Card){
-        Animation EnteringCard = AnimationUtils.loadAnimation(context, R.anim.abajo_arriba);
-        Card.setVisibility(View.VISIBLE);
-        Card.setAnimation(EnteringCard);
-        EnteringCard.start();
-    }
-
     public static void EsconderTarjeta(Context context, RelativeLayout Card){
         Animation ExitingCard = AnimationUtils.loadAnimation(context, R.anim.bottom_out_down);
         Card.setVisibility(View.GONE);
@@ -64,33 +58,6 @@ public class Methods {
             imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0); // hide
         } else {
             imm.toggleSoftInput(0, InputMethodManager.HIDE_IMPLICIT_ONLY); // show
-        }
-    }
-
-    public class ShowAnim extends Animation {
-        int targetHeight;
-        View view;
-
-        public ShowAnim(View view, int targetHeight) {
-            this.view = view;
-            this.targetHeight = targetHeight;
-        }
-
-        @Override
-        protected void applyTransformation(float interpolatedTime, Transformation t) {
-            view.getLayoutParams().height = (int) (targetHeight * interpolatedTime);
-            view.requestLayout();
-        }
-
-        @Override
-        public void initialize(int width, int height, int parentWidth,
-                               int parentHeight) {
-            super.initialize(width, height, parentWidth, parentHeight);
-        }
-
-        @Override
-        public boolean willChangeBounds() {
-            return true;
         }
     }
 
@@ -114,6 +81,11 @@ public class Methods {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    public static String QuitarAcentos(String string) {
+        return Normalizer.normalize(string, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
 
 }

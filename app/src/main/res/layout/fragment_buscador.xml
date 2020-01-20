@@ -52,6 +52,7 @@
         android:background="@drawable/buscador_background"
         android:layout_margin="10dp"
         android:layout_alignParentBottom="true"
+        android:padding="1dp"
         android:visibility="gone">
         <ImageView
             android:id="@+id/card_img"
@@ -79,31 +80,57 @@
             android:layout_below="@+id/card_nombre"
             android:maxLines="2"
             android:ellipsize="end"/>
-        <LinearLayout
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_alignParentBottom="true">
-            <TextView
-                android:layout_width="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:scrollbars="none">
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="7.5dp"
-                android:textColor="@color/black"
-                android:text="Cómo llegar"
-                android:background="@drawable/buscador_background"
-                android:drawableLeft="@drawable/flecha_map_azul"
-                android:drawablePadding="5dp"
-                android:layout_margin="7.5dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="7.5dp"
-                android:textColor="@color/black"
-                android:text="Fotos"
-                android:background="@drawable/buscador_background"
-                android:drawableLeft="@drawable/galeria_azul"
-                android:drawablePadding="5dp"
-                android:layout_margin="7.5dp"/>
-        </LinearLayout>
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/Como_llegar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="7.5dp"
+                    android:textColor="@color/black"
+                    android:text="Cómo llegar"
+                    android:background="@drawable/buscador_background"
+                    android:drawableLeft="@drawable/flecha_map_azul"
+                    android:drawablePadding="5dp"
+                    android:layout_margin="7.5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="7.5dp"
+                    android:textColor="@color/black"
+                    android:text="Fotos"
+                    android:background="@drawable/buscador_background"
+                    android:drawableLeft="@drawable/galeria_azul"
+                    android:drawablePadding="5dp"
+                    android:layout_margin="7.5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="7.5dp"
+                    android:textColor="@color/black"
+                    android:text="Ver más"
+                    android:background="@drawable/buscador_background"
+                    android:drawableLeft="@drawable/ver_mas_card_azul"
+                    android:drawablePadding="5dp"
+                    android:layout_margin="7.5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="7.5dp"
+                    android:textColor="@color/black"
+                    android:text="Opiniones"
+                    android:background="@drawable/buscador_background"
+                    android:drawableLeft="@drawable/resenas_azul"
+                    android:drawablePadding="5dp"
+                    android:layout_margin="7.5dp"/>
+            </LinearLayout>
+        </HorizontalScrollView>
     </RelativeLayout>
 </RelativeLayout>
