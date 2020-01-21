@@ -3,12 +3,8 @@ package arc.plus.megamonedero.Buscador;
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
@@ -24,9 +20,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,8 +29,6 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -49,34 +41,25 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.text.Normalizer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import arc.plus.megamonedero.Constant;
+import arc.plus.megamonedero.CenserInfo.InformacionCenser;
 import arc.plus.megamonedero.Entidades.EntidadesCensers;
 import arc.plus.megamonedero.Methods;
-import arc.plus.megamonedero.Principal;
 import arc.plus.megamonedero.R;
 
 import static android.content.Context.LOCATION_SERVICE;
+import static arc.plus.megamonedero.Constant.IdCenser;
 import static arc.plus.megamonedero.Methods.QuitarAcentos;
 
 public class Buscador extends Fragment implements OnMapReadyCallback {
@@ -105,6 +88,8 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
 
     public static RelativeLayout ContenedorZtop;
     public static Animation abajo_arriba, bottom_out_down;
+
+    public ArrayList<EntidadesCensers> lista_censers = new ArrayList<>();
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_buscador, container, false);
@@ -140,6 +125,9 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
         btn_ver_mas = view.findViewById(R.id.btn_ver_mas);
         btn_ver_mas.setOnClickListener(v -> {
             if(ContenedorZtop.getVisibility() == View.GONE){
+
+                getChildFragmentManager().beginTransaction().replace(ContenedorZtop.getId(),new InformacionCenser(IdCenser),"InformacionCenser").commit();
+
                 Animation animation = AnimationUtils.loadAnimation(getContext(),R.anim.abajo_arriba);
                 ContenedorZtop.setAnimation(animation);
                 animation.start();
@@ -404,17 +392,19 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
 
                     Marker marker =  Mapa.addMarker(options);
                     marker.setTitle(entidades.getNombre());
-                    marker.setTag(entidades.getIdCenser());
+                    marker.setTag(i);
 
                     Mapa.setOnMarkerClickListener(marker1 -> {
-                        String tag = marker1.getTag().toString();
+                        int position = Integer.parseInt(marker1.getTag().toString());
                         Card.setAnimation(abajo_arriba);
                         abajo_arriba.start();
                         Card.setVisibility(View.VISIBLE);
 
-                        Glide.with(getContext()).load("http://192.168.100.215/test/assets/Censers/"+entidades.getIdCenser()+"/1.jpg").centerCrop().override(240).into(Card_Image);
-                        Card_nombre.setText(entidades.getNombre());
-                        Card_descripcion.setText(entidades.getDescripcion());
+                        IdCenser = list.get(position).getIdCenser();
+
+                        Glide.with(getContext()).load("http://192.168.100.215/test/assets/Censers/"+list.get(position).getIdCenser()+"/1.jpg").centerCrop().override(240).into(Card_Image);
+                        Card_nombre.setText(list.get(position).getNombre());
+                        Card_descripcion.setText(list.get(position).getDescripcion());
 
                         return false;
                     });

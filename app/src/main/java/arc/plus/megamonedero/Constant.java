@@ -11,4 +11,6 @@ public class Constant {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
+    public static String IdCenser;
+
 }
