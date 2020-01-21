@@ -3,6 +3,7 @@ package arc.plus.megamonedero.Entidades;
 public class EntidadesCensers {
     private String IdCenser;
     private String Nombre;
+    private String Descripcion;
     private String Lat;
     private String Lang;
 
@@ -20,6 +21,14 @@ public class EntidadesCensers {
 
     public void setNombre(String nombre) {
         Nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return Descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        Descripcion = descripcion;
     }
 
     public String getLat() {

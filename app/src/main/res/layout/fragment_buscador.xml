@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+    >
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/map"
@@ -111,6 +111,7 @@
                     android:drawablePadding="5dp"
                     android:layout_margin="7.5dp"/>
                 <TextView
+                    android:id="@+id/btn_ver_mas"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="7.5dp"
@@ -133,4 +134,11 @@
             </LinearLayout>
         </HorizontalScrollView>
     </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/Contenedor_Ztop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:clickable="true"
+        android:visibility="gone"/>
 </RelativeLayout>

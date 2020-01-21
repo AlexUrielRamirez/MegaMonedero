@@ -98,19 +98,30 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private ImageView Card_Image;
 
+    private TextView btn_ver_mas,Card_nombre, Card_descripcion;
+
     private RequestQueue request;
     private JsonObjectRequest jsonObjectRequest;
 
+    public static RelativeLayout ContenedorZtop;
+    public static Animation abajo_arriba, bottom_out_down;
+
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_buscador, container, false);
+
+        abajo_arriba = AnimationUtils.loadAnimation(getContext(),R.anim.abajo_arriba);
+        bottom_out_down = AnimationUtils.loadAnimation(getContext(),R.anim.bottom_out_down);
 
         checkLocationPermission();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        ContenedorZtop = view.findViewById(R.id.Contenedor_Ztop);
+
         Card_Image = view.findViewById(R.id.card_img);
-        Glide.with(getContext()).load("https://www.beautymarket.es/estetica/foros/anuncio1547300315-12.jpg").centerCrop().override(240).into(Card_Image);
+        Card_nombre = view.findViewById(R.id.card_nombre);
+        Card_descripcion = view.findViewById(R.id.card_descripcion);
 
         new FillList().execute();
         lt = new LayoutTransition();
@@ -124,6 +135,15 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 Methods.ExpandirBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
+            }
+        });
+        btn_ver_mas = view.findViewById(R.id.btn_ver_mas);
+        btn_ver_mas.setOnClickListener(v -> {
+            if(ContenedorZtop.getVisibility() == View.GONE){
+                Animation animation = AnimationUtils.loadAnimation(getContext(),R.anim.abajo_arriba);
+                ContenedorZtop.setAnimation(animation);
+                animation.start();
+                ContenedorZtop.setVisibility(View.VISIBLE);
             }
         });
 
@@ -369,12 +389,36 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
                     JSONObject jsonObject = json.getJSONObject(i);
                     entidades.setIdCenser(jsonObject.optString("Id"));
                     entidades.setNombre(jsonObject.optString("Nombre"));
+                    entidades.setDescripcion(jsonObject.optString("Descripcion"));
                     entidades.setLat(jsonObject.optString("Lat"));
                     entidades.setLang(jsonObject.optString("Lang"));
                     list.add(entidades);
 
                     LatLng sydney = new LatLng(Double.parseDouble(entidades.getLat()),Double.parseDouble( entidades.getLang()));
-                    Mapa.addMarker(new MarkerOptions().position(sydney).title(entidades.getNombre()));
+                    /*Mapa.addMarker(
+                            new MarkerOptions()
+                                    .position(sydney)
+                                    .title(entidades.getNombre()));*/
+                    MarkerOptions options = new MarkerOptions();
+                    options.position(sydney);
+
+                    Marker marker =  Mapa.addMarker(options);
+                    marker.setTitle(entidades.getNombre());
+                    marker.setTag(entidades.getIdCenser());
+
+                    Mapa.setOnMarkerClickListener(marker1 -> {
+                        String tag = marker1.getTag().toString();
+                        Card.setAnimation(abajo_arriba);
+                        abajo_arriba.start();
+                        Card.setVisibility(View.VISIBLE);
+
+                        Glide.with(getContext()).load("http://192.168.100.215/test/assets/Censers/"+entidades.getIdCenser()+"/1.jpg").centerCrop().override(240).into(Card_Image);
+                        Card_nombre.setText(entidades.getNombre());
+                        Card_descripcion.setText(entidades.getDescripcion());
+
+                        return false;
+                    });
+
                 }
             } catch (JSONException e) {
                 Log.e("BuscarCenser","Error->"+e);

@@ -45,7 +45,11 @@ public class Principal extends AppCompatActivity {
         if(fragmentManager.findFragmentByTag("Feed") != null && fragmentManager.findFragmentByTag("Feed").isVisible())
             super.onBackPressed();
         else if(fragmentManager.findFragmentByTag("Servicios") != null && fragmentManager.findFragmentByTag("Servicios").isVisible()){
-            if(Buscador.Card.getVisibility() == View.VISIBLE)
+            if(Buscador.ContenedorZtop.getVisibility() == View.VISIBLE){
+                Buscador.ContenedorZtop.setAnimation(Buscador.bottom_out_down);
+                Buscador.bottom_out_down.start();
+                Buscador.ContenedorZtop.setVisibility(View.GONE);
+            }else if(Buscador.Card.getVisibility() == View.VISIBLE)
                 Methods.EsconderTarjeta(Principal.this,Buscador.Card);
             else
                 fragmentManager.beginTransaction().setCustomAnimations(R.anim.fadein,R.anim.fadeout).replace(R.id.SuperContenedor,new Feed(),"Feed").commit();
