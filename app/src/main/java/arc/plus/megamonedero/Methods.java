@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -16,7 +17,15 @@ import android.widget.RelativeLayout;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.text.DecimalFormat;
 import java.text.Normalizer;
+
+import static java.lang.Math.acos;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.toRadians;
 
 public class Methods {
     public static void ContraerBuscador(Context context, RelativeLayout HolderSearchBar, EditText Buscador, ImageView IconoBuscadorComprimido, RecyclerView Sugerencias){
@@ -86,6 +95,21 @@ public class Methods {
     public static String QuitarAcentos(String string) {
         return Normalizer.normalize(string, Normalizer.Form.NFD)
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+
+    public static long getDistanceMeters(double lat1, double lng1, double lat2, double lng2) {
+
+        double l1 = toRadians(lat1);
+        double l2 = toRadians(lat2);
+        double g1 = toRadians(lng1);
+        double g2 = toRadians(lng2);
+
+        double dist = acos(sin(l1) * sin(l2) + cos(l1) * cos(l2) * cos(g1 - g2));
+        if(dist < 0) {
+            dist = dist + Math.PI;
+        }
+
+        return Math.round(dist * 6378100);
     }
 
 }

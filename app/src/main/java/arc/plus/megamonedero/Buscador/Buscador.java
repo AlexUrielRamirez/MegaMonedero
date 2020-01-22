@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import arc.plus.megamonedero.CenserInfo.InformacionCenser;
+import arc.plus.megamonedero.Constant;
 import arc.plus.megamonedero.Entidades.EntidadesCensers;
 import arc.plus.megamonedero.Methods;
 import arc.plus.megamonedero.R;
@@ -189,6 +190,8 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
         Location location = ObtenerUltimaPosicionConocida();
         if(location != null){
             LatLng UserLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+            Constant.PosicionUsuario = UserLocation;
 
             Marker marker = Mapa.addMarker(new MarkerOptions()
                     .position(UserLocation)
@@ -396,6 +399,9 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
 
                     Mapa.setOnMarkerClickListener(marker1 -> {
                         int position = Integer.parseInt(marker1.getTag().toString());
+
+                        Constant.PosicionCenser = new LatLng(Double.parseDouble(list.get(position).getLat()),Double.parseDouble(list.get(position).getLang()));
+
                         Card.setAnimation(abajo_arriba);
                         abajo_arriba.start();
                         Card.setVisibility(View.VISIBLE);
