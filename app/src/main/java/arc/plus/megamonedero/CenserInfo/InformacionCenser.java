@@ -54,8 +54,8 @@ public class InformacionCenser extends Fragment {
 
         Distancia = view.findViewById(R.id.Distancia);
 
-        Distancia.setText(" A "+String.valueOf(Methods.getDistanceMeters(Constant.PosicionUsuario.latitude, Constant.PosicionUsuario.longitude,
-                Constant.PosicionCenser.latitude, Constant.PosicionCenser.longitude))+"m de distancia");
+        String distancia = "A "+ Methods.getDistanceMeters(Constant.PosicionUsuario.latitude, Constant.PosicionUsuario.longitude, Constant.PosicionCenser.latitude, Constant.PosicionCenser.longitude) +"m de distancia";
+        Distancia.setText(distancia);
 
         request = Volley.newRequestQueue(getContext());
         jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "http://192.168.100.215/test/traer_fotos_censer.php?IdCenser="+this.IdCenser, null, response -> {
