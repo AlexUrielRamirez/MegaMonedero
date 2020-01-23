@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/nombre_usuario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="7.5dp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="17sp"
+        android:text="Nombre"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="7.5dp">
+        <TextView
+            android:id="@+id/rating_user_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:textColor="@color/gray_light"
+            android:text="4.5"
+            android:layout_gravity="center_vertical"/>
+        <RatingBar
+            android:id="@+id/rating_user_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numStars="5"
+            android:clickable="false"
+            android:rating="4.5"
+            style="?attr/ratingBarStyleSmall"/>
+    </LinearLayout>
+    <TextView
+        android:id="@+id/fecha_opinion_usuario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="7.5dp"
+        android:textColor="@color/gray_light"
+        android:text="Hace 2 días"/>
+
+    <TextView
+        android:id="@+id/comentario_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textColor="@color/black"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="0.35dp"
+        android:background="@color/gray_light"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"/>
+
+
+</LinearLayout>

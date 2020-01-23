@@ -151,7 +151,7 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
         view.findViewById(R.id.Como_llegar).setOnClickListener(v->{
 
             String url = getDirectionsUrl(Constant.PosicionUsuario, Constant.PosicionCenser);
-            Toast.makeText(getContext(), url, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Próximamente", Toast.LENGTH_SHORT).show();
             DownloadTask downloadTask = new DownloadTask();
             downloadTask.execute(url);
         });
@@ -176,17 +176,14 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
                 Sugerencias.getAdapter().notifyDataSetChanged();
             }
         });
-        Buscador.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    BuscarCenser(v.getText().toString());
-                    Methods.ContraerBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
-                    Methods.hideKeyboard(getActivity());
-                    return true;
-                }
-                return false;
+        Buscador.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                BuscarCenser(v.getText().toString());
+                Methods.ContraerBuscador(getContext(),HolderSearchBar,Buscador,IconoBuscadorComprimido,Sugerencias);
+                Methods.hideKeyboard(getActivity());
+                return true;
             }
+            return false;
         });
 
         Sugerencias = view.findViewById(R.id.RecyclerSugerencias);

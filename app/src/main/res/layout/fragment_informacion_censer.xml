@@ -9,7 +9,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/main.appbar"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="200dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         android:fitsSystemWindows="true">
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -34,73 +34,154 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:maxLines="2"
-                android:ellipsize="end"
-                android:layout_margin="7.5dp"
-                android:text="Nombre Censer"
-                android:textSize="18sp"
-                android:textColor="@color/black"/>
-
-            <TextView
-                android:id="@+id/Distancia"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_margin="7.5dp"
-                android:text="A 478m de distancia"
-                android:textColor="@color/black"
-                android:drawableLeft="@drawable/persona_azul_maps"
-                android:gravity="center_vertical"
-                android:drawablePadding="5dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_margin="7.5dp"
-                android:text="117 opiniones de otros usuarios"
-                android:gravity="center_vertical"
-                android:drawablePadding="5dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:layout_margin="7.5dp"
-                android:text="Fotos"
-                android:textSize="15sp"
-                android:gravity="center_vertical"
-                android:drawableRight="@drawable/simple_arrow_right"
-                android:drawablePadding="5dp"
-                android:textColor="@color/black"/>
-            <HorizontalScrollView
+            <LinearLayout
+                android:id="@+id/LineaLayoutContentsHolder"
                 android:layout_width="match_parent"
-                android:layout_height="65dp"
-                android:layout_marginStart="7.5dp"
-                android:layout_marginEnd="7.5dp"
-                android:scrollbars="none">
-                <LinearLayout
-                    android:id="@+id/horizontal_gallery"
-                    android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/nombre_censer"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:orientation="horizontal"/>
-            </HorizontalScrollView>
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="7.5dp"/>
-        </LinearLayout>
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:text="Nombre Censer"
+                    android:textSize="18sp"
+                    android:textColor="@color/black" />
+                <TextView
+                    android:id="@+id/descripcion_censer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:text="Descripcion"
+                    android:textColor="@color/black" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginStart="7.5dp">
+                    <TextView
+                        android:id="@+id/rating_txt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="5dp"
+                        android:textColor="@color/gray_light"
+                        android:text="4.5"
+                        android:layout_gravity="center_vertical"/>
+                    <RatingBar
+                        android:id="@+id/rating_bar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:numStars="5"
+                        android:clickable="false"
+                        android:rating="4.5"
+                        style="?attr/ratingBarStyleSmall"/>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/direccion_censer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:textColor="@color/black"
+                    android:drawableLeft="@drawable/map_marker_azul"
+                    android:gravity="center_vertical"
+                    android:drawablePadding="5dp"/>
+
+                <TextView
+                    android:id="@+id/horario_censer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:textColor="@color/black"
+                    android:drawableLeft="@drawable/reloj_azul"
+                    android:gravity="center_vertical"
+                    android:drawablePadding="5dp"/>
+
+                <TextView
+                    android:id="@+id/Distancia"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:text="A 478m de distancia"
+                    android:textColor="@color/black"
+                    android:drawableLeft="@drawable/persona_azul_maps"
+                    android:gravity="center_vertical"
+                    android:drawablePadding="5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:text="117 opiniones de otros usuarios"
+                    android:gravity="center_vertical"
+                    android:drawablePadding="5dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:layout_margin="7.5dp"
+                    android:text="Fotos"
+                    android:textSize="15sp"
+                    android:gravity="center_vertical"
+                    android:drawableRight="@drawable/simple_arrow_right"
+                    android:drawablePadding="5dp"
+                    android:textColor="@color/black"/>
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="75dp"
+                    android:layout_marginStart="7.5dp"
+                    android:layout_marginEnd="7.5dp"
+                    android:scrollbars="none">
+                    <LinearLayout
+                        android:id="@+id/horizontal_gallery"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"/>
+                </HorizontalScrollView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/black"
+                    android:text="Opiniones de otros usuarios"
+                    android:layout_margin="7.5dp"/>
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0.35dp"
+                    android:background="@color/gray_light"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/RecyclerOpiniones"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="7.5dp"/>
+                </RelativeLayout>
+
+
+            </LinearLayout>
+
     </androidx.core.widget.NestedScrollView>
     <!--<com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_height="wrap_content"
