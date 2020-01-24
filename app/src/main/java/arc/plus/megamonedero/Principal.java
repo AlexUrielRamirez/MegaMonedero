@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import arc.plus.megamonedero.Buscador.Buscador;
+import arc.plus.megamonedero.CenserInfo.InformacionCenser;
 import arc.plus.megamonedero.Feed.Feed;
 
 public class Principal extends AppCompatActivity {
@@ -46,9 +47,13 @@ public class Principal extends AppCompatActivity {
             super.onBackPressed();
         else if(fragmentManager.findFragmentByTag("Servicios") != null && fragmentManager.findFragmentByTag("Servicios").isVisible()){
             if(Buscador.ContenedorZtop.getVisibility() == View.VISIBLE){
-                Buscador.ContenedorZtop.setAnimation(Buscador.bottom_out_down);
-                Buscador.bottom_out_down.start();
-                Buscador.ContenedorZtop.setVisibility(View.GONE);
+                if(InformacionCenser.HolderSlider.getVisibility() == View.VISIBLE){
+                    InformacionCenser.HolderSlider.setVisibility(View.GONE);
+                }else{
+                    Buscador.ContenedorZtop.setAnimation(Buscador.bottom_out_down);
+                    Buscador.bottom_out_down.start();
+                    Buscador.ContenedorZtop.setVisibility(View.GONE);
+                }
             }else if(Buscador.Card.getVisibility() == View.VISIBLE)
                 Methods.EsconderTarjeta(Principal.this,Buscador.Card);
             else

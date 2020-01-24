@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
+import arc.plus.megamonedero.Buscador.ViewPager.SliderAdapter;
 import arc.plus.megamonedero.Constant;
 import arc.plus.megamonedero.Entidades.EntidadesOpiniones;
 import arc.plus.megamonedero.Methods;
@@ -63,6 +66,11 @@ public class InformacionCenser extends Fragment {
 
     private RecyclerView RecyclerOpiniones;
     private ArrayList<EntidadesOpiniones> list_opiniones = new ArrayList<>();
+
+    public static RelativeLayout HolderSlider;
+    private ViewPager Slider;
+    private SliderAdapter sliderAdapter;
+    private int CurrentItem = 0;
 
     public InformacionCenser(String IdCenser){
         this.IdCenser = IdCenser;
@@ -103,6 +111,10 @@ public class InformacionCenser extends Fragment {
         RecyclerOpiniones = view.findViewById(R.id.RecyclerOpiniones);
         RecyclerOpiniones.setLayoutManager(new GridLayoutManager(getContext(),1));
 
+        HolderSlider = view.findViewById(R.id.holder_slider);
+        Slider = view.findViewById(R.id.slider);
+        view.findViewById(R.id.close_slider).setOnClickListener(v->HolderSlider.setVisibility(View.GONE));
+
         new RestAdapter.Builder().setEndpoint("http://192.168.100.215/test/").build().create(api_network_detalles_censer.class).setData(this.IdCenser, new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
@@ -124,9 +136,13 @@ public class InformacionCenser extends Fragment {
         request = Volley.newRequestQueue(getContext());
         jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "http://192.168.100.215/test/traer_fotos_censer.php?IdCenser="+this.IdCenser, null, response -> {
             JSONArray json = response.optJSONArray("Fotos");
+            ArrayList<String> list = new ArrayList<>();
             try {
                 for (int i = 0; i < json.length(); i++) {
                     JSONObject jsonObject = json.getJSONObject(i);
+
+                    list.add("http://192.168.100.215/test/"+jsonObject.optString("Ruta"));
+
                     ImageView iv = new ImageView(getContext());
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(Constant.dpToPx(75), Constant.dpToPx(75));
                     params.topMargin = Constant.dpToPx(1);
@@ -138,8 +154,12 @@ public class InformacionCenser extends Fragment {
 
                     Glide.with(getContext()).load("http://192.168.100.215/test/"+jsonObject.optString("Ruta")).centerCrop().override(144).into(iv);
 
+                    iv.setOnClickListener(v-> HolderSlider.setVisibility(View.VISIBLE));
+
                     horizontal_gallery.addView(iv);
                 }
+                sliderAdapter = new SliderAdapter(getContext(), list);
+                Slider.setAdapter(sliderAdapter);
             } catch (JSONException e) {
                 Log.e("BuscarCenser","Error->"+e);
             }
@@ -168,6 +188,8 @@ public class InformacionCenser extends Fragment {
 
         }, error -> Log.e("BuscarCenser","request Error->"+error));
         request.add(jsonObjectRequestOpiniones);
+
+
 
         return view;
     }

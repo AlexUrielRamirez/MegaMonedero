@@ -417,17 +417,19 @@ public class Buscador extends Fragment implements OnMapReadyCallback {
                     Mapa.setOnMarkerClickListener(marker1 -> {
                         int position = Integer.parseInt(marker1.getTag().toString());
 
-                        Constant.PosicionCenser = new LatLng(Double.parseDouble(list.get(position).getLat()),Double.parseDouble(list.get(position).getLang()));
+                        if(position!=-1){
+                            Constant.PosicionCenser = new LatLng(Double.parseDouble(list.get(position).getLat()),Double.parseDouble(list.get(position).getLang()));
 
-                        Card.setAnimation(abajo_arriba);
-                        abajo_arriba.start();
-                        Card.setVisibility(View.VISIBLE);
+                            Card.setAnimation(abajo_arriba);
+                            abajo_arriba.start();
+                            Card.setVisibility(View.VISIBLE);
 
-                        IdCenser = list.get(position).getIdCenser();
+                            IdCenser = list.get(position).getIdCenser();
 
-                        Glide.with(getContext()).load("http://192.168.100.215/test/assets/Censers/"+list.get(position).getIdCenser()+"/1.jpg").centerCrop().override(240).into(Card_Image);
-                        Card_nombre.setText(list.get(position).getNombre());
-                        Card_descripcion.setText(list.get(position).getDescripcion());
+                            Glide.with(getContext()).load("http://192.168.100.215/test/assets/Censers/"+list.get(position).getIdCenser()+"/1.jpg").centerCrop().override(240).into(Card_Image);
+                            Card_nombre.setText(list.get(position).getNombre());
+                            Card_descripcion.setText(list.get(position).getDescripcion());
+                        }
 
                         return false;
                     });
